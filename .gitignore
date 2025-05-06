@@ -1,0 +1,4 @@
+.vscode/
+*.pyc
+lib/
+__pycache__/
