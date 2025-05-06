@@ -1,0 +1,6 @@
+matplotlib>=3.0.0
+numpy>=1.20.0
+streamlit>=1.0.0
+pyvis>=0.3.0
+networkx>=2.0.0
+optuna>=4.3.0
