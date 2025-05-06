@@ -31,6 +31,15 @@ n_trials = st.sidebar.number_input("优化迭代次数", 10, 1000, 200, 10)
 run = st.sidebar.button("开始优化")
 
 if run:
+    # Map mode from string to integer
+    mode_mapping = {
+        "普通最短路径": 1,
+        "考虑时延固定功率只切换频率": 2,
+        "可切换频率和功率综合考虑能耗时延": 3,
+        "可切换频率和功率只考虑能耗": 4
+    }
+    mode_int = mode_mapping.get(mode, 1)  # Default to 1 if mode is not found
+
     args = argparse.Namespace(
         c=3e8,
         packet_size=packet_size,
@@ -38,7 +47,7 @@ if run:
         T_min=T_min,
         alpha=alpha,
         beta=beta,
-        mode=mode,
+        mode=mode_int,
         nodes=nodes_str,
         max_freq=max_freq,
         min_freq=min_freq,
@@ -49,7 +58,8 @@ if run:
         n_trials=n_trials
     )
     opt = NetworkOptimization(args)
-    if mode in (3,4):
+    st.warning(mode)
+    if mode_int in (3, 4):
         study = opt.optimize(n_trials)
         best = study.best_trial
         user = best.user_attrs
@@ -59,16 +69,14 @@ if run:
         if missing_keys:
             st.error(f"无法满足约束，无解")
             st.stop()
-        
         f_opt = best.params['f']
         Pt_list = user['Pt_list']
         delays  = user['delays']
         paths   = user['paths']
         total_energy = user['total_energy']
         avg_delay = user['avg_delay']
-
-    elif mode == 1:
-        # static shortest
+    
+    elif mode_int == 1:
         Pt_list = [static_P_tx] * len(opt.nodes)
         delays, paths, total_energy, f_opt = opt.mode1()
         avg_delay = sum(delays) / (len(delays) - 1)
